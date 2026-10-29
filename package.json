@@ -15,6 +15,10 @@
     "./knowledge-review": {
       "types": "./dist/knowledge-review.d.ts",
       "default": "./dist/knowledge-review.js"
+    },
+    "./repository": {
+      "types": "./dist/repository.d.ts",
+      "default": "./dist/repository.js"
     }
   },
   "engines": {
@@ -22,14 +26,15 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/*.test.ts",
+    "test": "node --test --test-concurrency=1 tests/*.test.ts",
     "check": "npm run typecheck && npm test && npm run build && node scripts/validate-pr-registry.mjs",
     "build": "tsc -p tsconfig.build.json",
     "prepare": "npm run build"
   },
   "devDependencies": {
     "@types/node": "26.6.5",
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "@electric-sql/pglite": "0.5.12"
   },
   "files": [
     "dist",
@@ -37,6 +42,7 @@
     "docs"
   ],
   "dependencies": {
-    "@accountability/knowledge-verification": "git+https://github.com/neophilism/Knowledge-and-verification-engine.git#85e7185e608b4663254284b673256d17cf5da6e8"
+    "@accountability/knowledge-verification": "git+https://github.com/neophilism/Knowledge-and-verification-engine.git#85e7185e608b4663254284b673256d17cf5da6e8",
+    "@accountability/evidence-sql": "git+https://github.com/neophilism/Evidence-Storage-and-Provenance-Engine.git#dce7105a70b42d77afe4cd48d34723331447037c"
   }
 }

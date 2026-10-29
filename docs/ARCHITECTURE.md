@@ -21,3 +21,5 @@ Partial private effort bookkeeping is documented in EFFORTS.md; it records unres
 The explicit consumer upgrade and its limits are documented in KNOWLEDGE_COMPATIBILITY.md. Relationship-subject claims remain unassessed; exact current claim checks do not certify current transitive subjects.
 
 Read-only exact plan/Knowledge edition review is documented in KNOWLEDGE_REVIEW.md. It makes changed/missing captured dependencies visible without rewriting records or establishing permission, verification, completeness or full correction impact.
+
+Partial own-DB plan persistence is documented in REPOSITORY.md; it supersedes pure-planning-only persistence notes. Efforts remain pure, and current authenticated upstream/Identity integration is still pending. No evaluated answers or closure are added.
