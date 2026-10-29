@@ -7,6 +7,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./efforts": {
+      "types": "./dist/efforts.d.ts",
+      "default": "./dist/efforts.js"
     }
   },
   "engines": {
