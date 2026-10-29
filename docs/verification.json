@@ -12,7 +12,7 @@
   "typecheck": "passed",
   "build": "passed",
   "registry": "passed",
-  "review": "No unresolved finding; no current authentication/durable storage/semantic truth or closure claim.",
+  "review": "Source/adversarial review completed; no unresolved finding. Exact fields/scope/roles/current claims/lineage/material retention/tree ordering/caps/private defaults/no effects. No current authentication/durability/semantic verification/closure claim.",
   "pending": [
     "Current authenticated Knowledge/Identity/action/consent/rights integration",
     "Durable own-DB audit/idempotency",
@@ -27,5 +27,10 @@
     "tests": 7,
     "conclusion": "success",
     "logsInspected": true
+  },
+  "installedCompiledPublicExports": {
+    "tests": 8,
+    "conclusion": "passed",
+    "indexJsByteMatchesBuild": true
   }
 }
