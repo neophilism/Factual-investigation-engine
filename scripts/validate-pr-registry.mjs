@@ -23,3 +23,6 @@ assert.equal(
 console.log(
   "Valid E08 registry:15 engines/122 tasks; original IDs/dependencies and Knowledge pin retained",
 );
+
+assert.equal(read("package.json").dependencies["@accountability/evidence-sql"], "git+https://github.com/neophilism/Evidence-Storage-and-Provenance-Engine.git#dce7105a70b42d77afe4cd48d34723331447037c");
+console.log("Stable persistence SDK pinned for OWN Factual operational DB");
