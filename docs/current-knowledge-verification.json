@@ -1,0 +1,34 @@
+{
+  "status": "partial; current-head CI/merge required",
+  "localTests": 48,
+  "newTripleDatabaseRestrictedMigrationGroups": 3,
+  "typecheck": "passed",
+  "build": "passed",
+  "registry": "passed",
+  "sourceSha256": {
+    "src/identity-repository.ts": "9115076c83e8a105a08f0d4fa8d5a133b443ce47efdbb9a90cbf775092287122",
+    "tests/identity-repository.test.ts": "1040fa5f30ff6a1bc7490a291a875783342c3783b5ce22df69a876db663d12d6",
+    "package.json": "fca993f5a4c706abf339097910ec0c26a12973f21c63d828b4e89c3bd73755ef",
+    "package-lock.json": "03650909d16603e3fef7bb998028b5e50d7343677b826645c3dca7fba55f4c6d",
+    "scripts/validate-pr-registry.mjs": "3b988b2a255f5d109cdb78de94f8972e926acf50e7ad69b9d9ba631525b9ab99"
+  },
+  "review": "No unresolved source finding. Configured current-Identity Knowledge load is bound at construction, no caller snapshot. Factual authority before and after current owning Knowledge observation; strict monotonic source admission/result and cancellation gate, all begun SQL awaited. Actual owning validators/current claim checks preserved. Legacy APIs unchanged and no fallback on new-path denial. Separate Identity/Knowledge/Factual operational DBs asserted. Explicit accepted Knowledge pin upgrade regresses all prior pure/SQL/Identity/effort APIs.",
+  "limits": [
+    "Host must independently authenticate principal kind/id/request, configuration/time and configure approved actual owning repositories; not network credential/transport/login qualification.",
+    "Sequential Factual/Knowledge/Factual observations are not distributed revocation/content fencing. Current Evidence/Intake, consent/rights and deployment controls remain pending.",
+    "Every historical replay checks current source and Factual authority but original cached refs are not newly revalidated claim usability or a new action permit.",
+    "Legacy snapshot append remains available for explicit host integration; use appendFromKnowledge exclusively where required, never fallback.",
+    "Await begun SQL; preserve acknowledged Factual completion, lost acknowledgement UNKNOWN. Host ingress/CPU/heap/driver/transaction/concurrency limits remain mandatory.",
+    "PGlite hooks/contenders are not independent TCP/crash/TLS/failover/production/browser/AT/live qualification. No provider/send/publication/payment/PAM changes."
+  ],
+  "installedCompiledExportTests": 48,
+  "identityAndRepositoryJsByteMatch": true,
+  "initialCI": {
+    "source": "fae397c4d224336bbf52fbde22b02b8784660c80",
+    "run": 40886668052,
+    "job": 123492120095,
+    "tests": 48,
+    "conclusion": "success",
+    "headAndLogsInspected": true
+  }
+}

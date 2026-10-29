@@ -1,3 +1,4 @@
+import type { IdentityKnowledgeRepository } from "@accountability/knowledge-verification/identity-repository";
 import type { KnowledgeState } from "@accountability/knowledge-verification";
 import type { EffortInput } from "./efforts.ts";
 import type { MembershipRegistry } from "@accountability/identity-policy/membership";
@@ -17,6 +18,7 @@ export const FACTUAL_RESOURCE_ID = digest({
 });
 /** Explicit opt-in; host authenticates human kind/id. Current stored roles replace incoming roles. */
 export class IdentityFactualRepository {
+  readonly #knowledge: IdentityKnowledgeRepository["load"] | null;
   readonly #resolve: MembershipRegistry["resolveResource"];
   readonly #load: FactualRepository["load"];
   readonly #efforts: FactualRepository["loadEfforts"];
@@ -29,7 +31,9 @@ export class IdentityFactualRepository {
     membership: MembershipRegistry,
     policy: Scope & Readonly<{ purpose: string }>,
     timeoutMs = 10000,
+    knowledge?: IdentityKnowledgeRepository,
   ) {
+    this.#knowledge = knowledge ? knowledge.load.bind(knowledge) : null;
     this.#resolve = membership.resolveResource.bind(membership);
     this.#load = repository.load.bind(repository);
     this.#efforts = repository.loadEfforts.bind(repository);
@@ -129,6 +133,46 @@ export class IdentityFactualRepository {
     return this.#recordEffort(
       await this.#context(context, signal),
       expectedStorageRevision,
+      q,
+      commandId,
+    );
+  }
+  /** Explicit current owning-Knowledge path; no caller snapshot or fallback. */
+  async appendFromKnowledge(
+    context: Context,
+    expectedStorageRevision: number,
+    command: PlanningCommand,
+    commandId: string,
+    signal?: AbortSignal,
+  ) {
+    const q = structuredClone(command);
+    const actual = await this.#context(context, signal);
+    invariant(
+      this.#knowledge,
+      "knowledge_unavailable",
+      "Current Knowledge observation unavailable",
+    );
+    const started = performance.now();
+    let snapshot: Awaited<ReturnType<IdentityKnowledgeRepository["load"]>>;
+    try {
+      snapshot = structuredClone(await this.#knowledge(actual, signal));
+    } catch {
+      invariant(
+        false,
+        "knowledge_unavailable",
+        "Current Knowledge observation unavailable",
+      );
+    }
+    invariant(
+      !signal?.aborted && performance.now() - started < this.#timeout,
+      "knowledge_unavailable",
+      "Current Knowledge observation unavailable",
+    );
+    // Reobserve Factual authority after the upstream stage; no distributed fence is claimed.
+    return this.#append(
+      await this.#context(actual, signal),
+      expectedStorageRevision,
+      snapshot.state,
       q,
       commandId,
     );
