@@ -19,3 +19,5 @@ All eight groups also pass freshly packed installed compiled public exports; ind
 Partial private effort bookkeeping is documented in EFFORTS.md; it records unresolved attempts/outcomes without closing questions, executing leads or verifying claims. Earlier effort-pending statements describe the first planning checkpoint.
 
 The explicit consumer upgrade and its limits are documented in KNOWLEDGE_COMPATIBILITY.md. Relationship-subject claims remain unassessed; exact current claim checks do not certify current transitive subjects.
+
+Read-only exact plan/Knowledge edition review is documented in KNOWLEDGE_REVIEW.md. It makes changed/missing captured dependencies visible without rewriting records or establishing permission, verification, completeness or full correction impact.

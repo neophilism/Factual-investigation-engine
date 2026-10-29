@@ -11,6 +11,10 @@
     "./efforts": {
       "types": "./dist/efforts.d.ts",
       "default": "./dist/efforts.js"
+    },
+    "./knowledge-review": {
+      "types": "./dist/knowledge-review.d.ts",
+      "default": "./dist/knowledge-review.js"
     }
   },
   "engines": {
