@@ -222,3 +222,29 @@ test("512-record and UTF8 budgets preserve earlier efforts without eviction", ()
   for (const r of huge.records) Object.assign(r, { detail: "😀".repeat(2000) });
   assert.throws(() => e.assertEffortState(huge), { code: "efforts_full" });
 });
+
+test("question-wide records remain separate from leads and cannot be corrected into another context", () => {
+  const x = setup();
+  const s = e.recordEffort(c, x.plans, x.state, {
+    ...x.q,
+    leadId: null,
+    outcome: "attempted",
+  });
+  assert.equal(s.records[0]!.leadId, null);
+  assert.throws(
+    () =>
+      e.recordEffort(c, x.plans, s, {
+        ...x.q,
+        id: "wrong-lead",
+        expectedSequence: 1,
+        corrects: s.records[0]!.ref,
+      }),
+    { code: "invalid_correction" },
+  );
+  const detail = x.q.detail;
+  const input = { ...x.q, id: "lead-effort", expectedSequence: 1 };
+  const next = e.recordEffort(c, x.plans, s, input);
+  Object.assign(input, { detail: "Mutated caller input" });
+  assert.equal(next.records[1]!.detail, detail);
+  assert.equal(e.inspectEfforts(c, next).effective.length, 2);
+});

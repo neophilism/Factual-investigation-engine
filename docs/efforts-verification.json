@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "status": "partial; final-head CI/merge pending",
+  "localTests": 15,
+  "newEffortGroups": 7,
+  "installedCompiledPublicExportTests": 15,
+  "effortsJsByteMatchesBuild": true,
+  "typecheck": "passed",
+  "build": "passed",
+  "registry": "passed",
+  "sourceSha256": {
+    "src/efforts.ts": "c2cb7f435ebab7822438d287e4f57dfb6e96c74e9fa7fb35ad8df349165323f6",
+    "tests/efforts.test.ts": "c5ab18f89e82b108fdf0712d9420a8d9997c834bd2c345ad6c7634f0012918cb",
+    "package.json": "a7084d481a7b0fb3d24b80478c47053f4a0472f831cae7995acdcb338cfacfcf"
+  },
+  "initialCI": {
+    "source": "8c3c68746a247a45f916b038db7ba31c0ae952af",
+    "run": 40814839190,
+    "job": 123253380694,
+    "tests": 14,
+    "conclusion": "success",
+    "logsInspected": true
+  },
+  "review": "No unresolved finding. Exact profiles/scope/roles/plan and question refs; current plan vs historical corrections; immutable records/correction chain without forks; capacities/copies; no answer/closure/effects.",
+  "limitations": [
+    "Trusted host Context/planning snapshots are not authentication or evidence of actual work.",
+    "Effective leaves describe exact containing historical plan editions; not current coverage or evaluated answers.",
+    "No SQL/durable audit/idempotency/network/provider/UI/browser/AT/live qualification.",
+    "AM-05.06 verification/closure dependencies remain unmet; own-DB/current Identity/consent/rights pending."
+  ]
+}
