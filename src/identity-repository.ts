@@ -1,0 +1,136 @@
+import type { KnowledgeState } from "@accountability/knowledge-verification";
+import type { EffortInput } from "./efforts.ts";
+import type { MembershipRegistry } from "@accountability/identity-policy/membership";
+import {
+  digest,
+  invariant,
+  nonempty,
+  requireScope,
+} from "@accountability/knowledge-verification/contracts";
+import type {
+  Context,
+  Scope,
+} from "@accountability/knowledge-verification/contracts";
+import type { FactualRepository, PlanningCommand } from "./repository.ts";
+export const FACTUAL_RESOURCE_ID = digest({
+  kind: "factual-private-history-v1",
+});
+/** Explicit opt-in; host authenticates human kind/id. Current stored roles replace incoming roles. */
+export class IdentityFactualRepository {
+  readonly #resolve: MembershipRegistry["resolveResource"];
+  readonly #load: FactualRepository["load"];
+  readonly #efforts: FactualRepository["loadEfforts"];
+  readonly #recordEffort: FactualRepository["recordEffort"];
+  readonly #append: FactualRepository["append"];
+  readonly #policy: Scope & Readonly<{ purpose: string }>;
+  readonly #timeout: number;
+  constructor(
+    repository: FactualRepository,
+    membership: MembershipRegistry,
+    policy: Scope & Readonly<{ purpose: string }>,
+    timeoutMs = 10000,
+  ) {
+    this.#resolve = membership.resolveResource.bind(membership);
+    this.#load = repository.load.bind(repository);
+    this.#efforts = repository.loadEfforts.bind(repository);
+    this.#recordEffort = repository.recordEffort.bind(repository);
+    this.#append = repository.append.bind(repository);
+    this.#policy = structuredClone(policy);
+    this.#timeout = timeoutMs;
+    nonempty(this.#policy.tenantId, "Tenant", 128);
+    nonempty(this.#policy.projectId, "Project", 128);
+    nonempty(this.#policy.purpose, "Purpose", 128);
+    invariant(
+      Number.isSafeInteger(timeoutMs) && timeoutMs >= 1 && timeoutMs <= 30000,
+      "invalid_policy",
+      "Bounded Identity acceptance budget required",
+    );
+  }
+  async #context(context: Context, signal?: AbortSignal): Promise<Context> {
+    const started = performance.now(),
+      c = structuredClone(context);
+    requireScope(this.#policy, c);
+    invariant(
+      c.actor.kind === "human" && c.purpose === this.#policy.purpose,
+      "forbidden",
+      "Human and fixed purpose required",
+    );
+    // Caller roles have no authority. Begun Identity SQL is awaited, never raced or terminated.
+    const principal = { ...c, actor: { ...c.actor, roles: [] } };
+    const admitted = () =>
+      !signal?.aborted && performance.now() - started < this.#timeout;
+    invariant(
+      admitted(),
+      "identity_unavailable",
+      "Current Identity observation unavailable",
+    );
+    let resolved: Awaited<ReturnType<MembershipRegistry["resolveResource"]>>;
+    try {
+      resolved = structuredClone(
+        await this.#resolve(principal, FACTUAL_RESOURCE_ID, "investigate"),
+      );
+    } catch {
+      invariant(
+        false,
+        "identity_unavailable",
+        "Current Identity observation unavailable",
+      );
+    }
+    invariant(
+      admitted(),
+      "identity_unavailable",
+      "Current Identity observation unavailable",
+    );
+    const actual = resolved.context;
+    requireScope(this.#policy, actual);
+    invariant(
+      resolved.resourceId === FACTUAL_RESOURCE_ID &&
+        actual.actor.kind === "human" &&
+        actual.actor.id === c.actor.id &&
+        actual.purpose === c.purpose &&
+        actual.requestId === c.requestId,
+      "identity_unavailable",
+      "Current Identity binding unavailable",
+    );
+    return actual;
+  }
+  async load(context: Context, signal?: AbortSignal) {
+    return this.#load(await this.#context(context, signal));
+  }
+  async append(
+    context: Context,
+    expectedStorageRevision: number,
+    knowledge: KnowledgeState,
+    command: PlanningCommand,
+    commandId: string,
+    signal?: AbortSignal,
+  ) {
+    const q = structuredClone(command),
+      upstream = structuredClone(knowledge);
+    return this.#append(
+      await this.#context(context, signal),
+      expectedStorageRevision,
+      upstream,
+      q,
+      commandId,
+    );
+  }
+  async loadEfforts(context: Context, signal?: AbortSignal) {
+    return this.#efforts(await this.#context(context, signal));
+  }
+  async recordEffort(
+    context: Context,
+    expectedStorageRevision: number,
+    input: EffortInput,
+    commandId: string,
+    signal?: AbortSignal,
+  ) {
+    const q = structuredClone(input);
+    return this.#recordEffort(
+      await this.#context(context, signal),
+      expectedStorageRevision,
+      q,
+      commandId,
+    );
+  }
+}

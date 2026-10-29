@@ -26,3 +26,6 @@ console.log(
 
 assert.equal(read("package.json").dependencies["@accountability/evidence-sql"], "git+https://github.com/neophilism/Evidence-Storage-and-Provenance-Engine.git#dce7105a70b42d77afe4cd48d34723331447037c");
 console.log("Stable persistence SDK pinned for OWN Factual operational DB");
+
+assert.equal(read("package.json").dependencies["@accountability/identity-policy"], "git+https://github.com/neophilism/Identity-Authorization-and-Policy-Engine.git#763060ddc840979b56483afd830f78679a2369b0");
+console.log("Accepted Identity resource policy pin retained");

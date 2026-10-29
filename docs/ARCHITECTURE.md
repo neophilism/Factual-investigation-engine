@@ -25,3 +25,5 @@ Read-only exact plan/Knowledge edition review is documented in KNOWLEDGE_REVIEW.
 Partial own-DB plan persistence is documented in REPOSITORY.md; it supersedes pure-planning-only persistence notes. Efforts remain pure, and current authenticated upstream/Identity integration is still pending. No evaluated answers or closure are added.
 
 Durable effort metadata is now partially implemented in EFFORT_REPOSITORY.md; earlier pure-effort/persistence-pending statements are historical. Current Identity/upstream authorization, evaluated answers and closure remain pending.
+
+Explicit opt-in current stored Identity/resource-policy integration is now documented in IDENTITY_REPOSITORY.md; earlier Identity-pending notes still apply to direct legacy repository access. Host proofing/current upstream/consent/rights and production qualification remain pending.
