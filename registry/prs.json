@@ -156,7 +156,7 @@
       "contributingPrs": [
         1
       ],
-      "implementationStatus": "partial private planning; eight local tests/typecheck/build/registry; installed/CI/review evidence in docs/verification.json",
+      "implementationStatus": "partial private planning; eight local tests/typecheck/build/registry; installed/CI/review evidence in docs/verification.json; partial private effort bookkeeping checkpoint; final-head CI/installed review pending; AM-05.06 verification/closure dependencies remain unmet",
       "acceptanceCriteria": [
         "A report becomes a plan including at least one route for testing contrary evidence where applicable.",
         "Provide the authorized visual or table view, source-bound test evidence and documented failure behavior."
@@ -200,7 +200,7 @@
         "AM-05.05"
       ],
       "contributingPrs": [],
-      "implementationStatus": "planned",
+      "implementationStatus": "planned; partial private effort bookkeeping checkpoint; final-head CI/installed review pending; AM-05.06 verification/closure dependencies remain unmet",
       "acceptanceCriteria": [
         "Material unanswered questions are explicitly unresolved, deferred or assigned before closure.",
         "Provide the authorized visual or table view, source-bound test evidence and documented failure behavior."
