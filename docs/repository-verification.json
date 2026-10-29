@@ -1,0 +1,36 @@
+{
+  "status": "partial; current-head CI/merge required",
+  "localTests": 37,
+  "newRestrictedMigrationGroups": 8,
+  "typecheck": "passed",
+  "build": "passed",
+  "registry": "passed",
+  "initialCI": {
+    "source": "0e81d5832f05b62ad8d2363626e7342b6cd61fee",
+    "run": 40862549515,
+    "job": 123409143509,
+    "tests": 36,
+    "conclusion": "success",
+    "headAndLogsInspected": true
+  },
+  "sourceSha256": {
+    "src/repository.ts": "251ccca1f41ab61c064759947ce6ade51582adeee13fa7588e7c1016742f86d7",
+    "tests/repository.test.ts": "34aa14c3714e66bb5dfba8b1fa6744461ece54b3ca6aaab03343735897f94f85",
+    "package.json": "d760cb8336fb7201f81b5f1f58e0417bbf3345e161b72081c5d61ce7485336af",
+    "package-lock.json": "72372e313f3764d25c5f686db798b7a5342335d52fb5be0c0bc507e58e137e77",
+    "scripts/validate-pr-registry.mjs": "e6fc2393fca2d839e1ea78a5896244310069c1fe928e1bfddfbb50da33e5e1c8"
+  },
+  "review": "No unresolved source finding. Actual own project lock precedes plan/cache reads, captured human policy/role/scope/purpose checked before cache. Actual accepted planning/Knowledge domain validates new commands; storage and logical CAS remain distinct. Atomic record/audit/outbox/ack. Exact historical replay returns original refs without revalidating supplied current Knowledge; this is explicit metadata, not a source attestation/permit. No generic import/delete or closure. Existing pure APIs/pin unchanged.",
+  "limits": [
+    "Context/current principal, configuration/time and Knowledge snapshots are trusted host input; current Identity/upstream transport and consent/rights integration remain pending.",
+    "Fixed exact intakeCaseRef association is not evidence of case existence, current edition or authorization; never duplicates Intake lifecycle.",
+    "Own Factual DB only on stable SQL SDK, separate from Knowledge/Evidence/Intake; no foreign DB opened.",
+    "Source snapshot is deliberately excluded from historical replay fingerprint; original historical acknowledgement is not current upstream attestation or new authority.",
+    "Embedded PGlite contenders do not establish independent TCP/network, crash/TLS/failover/production acceptance.",
+    "Host ingress/CPU/heap/transaction/driver limits required; begun SQL awaited and lost acknowledgement unknown.",
+    "Efforts remain pure; no evaluated answers, completeness/closure, daemon/HTTP/UI/browser/AT/live/provider/send/publication/payment. PAM stays foundation."
+  ],
+  "installedCompiledExportTests": 37,
+  "repositoryJsByteMatch": true,
+  "installedHarness": "All5 test files passed against installed compiled public exports, complete TAP footers checked:7+5+9+8+8=37. Initial sequential launcher produced only three complete files; remaining two were run explicitly, no incomplete invocation counted as full acceptance."
+}

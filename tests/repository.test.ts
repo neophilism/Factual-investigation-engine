@@ -329,3 +329,67 @@ test("captured config inputs and corrupted stored sequence cannot rewrite histor
     ),
   );
 });
+
+test("storage CAS spans distinct logical plans while exact plan predecessors and case association stay independent", async (t) => {
+  const f = await fixture(t),
+    x = input();
+  const first = await f.repo.append(c, 0, x.knowledge, x.command, "first");
+  const second = await f.repo.append(
+    c,
+    1,
+    x.knowledge,
+    { ...x.command, id: "other-plan" },
+    "other",
+  );
+  assert.equal(second.storage.revision, 2);
+  assert.equal(second.record.revision, 1);
+  const revised = await f.repo.append(
+    c,
+    2,
+    x.knowledge,
+    { ...x.command, expectedRevision: 1 },
+    "revise",
+  );
+  assert.equal(revised.storage.revision, 3);
+  assert.equal(revised.record.revision, 2);
+  const read = await f.repo.load(c);
+  assert.deepEqual(read.state.records[2]!.supersedes, first.record);
+  assert.equal(read.state.records[1]!.supersedes, null);
+  await assert.rejects(
+    f.repo.append(
+      c,
+      2,
+      x.knowledge,
+      { ...x.command, id: "other-plan", expectedRevision: 1 },
+      "stale-storage",
+    ),
+    { code: "revision_conflict" },
+  );
+  await assert.rejects(
+    f.repo.append(
+      c,
+      3,
+      x.knowledge,
+      {
+        ...x.command,
+        expectedRevision: 2,
+        value: {
+          ...x.command.value,
+          intakeCaseRef: {
+            tenantId: c.tenantId,
+            projectId: c.projectId,
+            kind: "case",
+            id: "fixture-unverified-case",
+            revision: 1,
+          },
+        },
+      },
+      "change-case",
+    ),
+  );
+  assert.deepEqual(
+    await f.repo.append(c, 0, k.createKnowledgeState(c), x.command, "first"),
+    first,
+  );
+  assert.equal((await f.repo.load(c)).revision, 3);
+});
