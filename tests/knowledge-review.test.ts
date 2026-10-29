@@ -355,3 +355,101 @@ test("edge budget is independent from deduplicated node count and refuses oversi
     { code: "review_full" },
   );
 });
+
+test("hypothesis-only roots and multiple captured editions retain each path without logical-ID collapse", () => {
+  const x = setup();
+  let knowledge = k.reviseKnowledge(c, x.knowledge, {
+    id: "person",
+    expectedRevision: 1,
+    value: entity,
+  });
+  const person2 = knowledge.records.at(-1)!.ref;
+  knowledge = k.reviseKnowledge(c, knowledge, {
+    id: "role",
+    expectedRevision: 1,
+    value: { ...x.roleValue, from: person2 },
+  });
+  const role2 = knowledge.records.at(-1)!.ref;
+  knowledge = k.reviseKnowledge(c, knowledge, {
+    id: "second",
+    expectedRevision: 0,
+    value: { ...claimValue, subjectRefs: [role2] },
+  });
+  const second = knowledge.records.at(-1)!.ref;
+  const value: f.Plan = {
+    ...x.value,
+    questions: x.value.questions.map((q) => ({
+      ...q,
+      hypotheses: q.hypotheses.map((h) => ({ ...h, claimRefs: [second] })),
+    })),
+  };
+  const plans = f.revisePlan(c, knowledge, x.plans, {
+    id: "plan",
+    expectedRevision: 1,
+    value,
+  });
+  const report = reviewPlanKnowledge(
+    c,
+    knowledge,
+    plans,
+    plans.records.at(-1)!.ref,
+  );
+  assert.deepEqual(report.roots, [x.claim, second]);
+  assert.equal(report.nodes.length, 7);
+  assert.deepEqual(
+    report.nodes
+      .filter((n) => n.ref.kind === "relationship")
+      .map((n) => [n.ref.revision, n.status]),
+    [
+      [1, "changed-edition"],
+      [2, "current-edition"],
+    ],
+  );
+  assert.deepEqual(
+    report.edges
+      .filter((e) => e.kind === "relationship-from")
+      .map((e) => [e.from, e.to]),
+    [
+      [x.role, x.person],
+      [role2, person2],
+    ],
+  );
+  assert.equal(report.edges.filter((e) => e.kind === "event-entity").length, 1);
+  assert.equal(report.nodes.filter((n) => n.ref.kind === "entity").length, 2);
+});
+
+test("snapshot comparison never expands an unrelated latest-role subtree or synthesizes event time", () => {
+  const x = setup();
+  let knowledge = k.reviseKnowledge(c, x.knowledge, {
+    id: "new-person",
+    expectedRevision: 0,
+    value: entity,
+  });
+  const newPerson = knowledge.records.at(-1)!.ref;
+  knowledge = k.reviseKnowledge(c, knowledge, {
+    id: "role",
+    expectedRevision: 1,
+    value: {
+      ...x.roleValue,
+      from: newPerson,
+      time: { earliest: "2026-01-01T00:00:00Z", latest: null },
+    },
+  });
+  const before = structuredClone(knowledge);
+  const report = reviewPlanKnowledge(c, knowledge, x.plans, x.selected);
+  assert(!report.nodes.some((n) => n.ref.id === newPerson.id));
+  assert.deepEqual(
+    report.edges.find((e) => e.kind === "relationship-from")!.to,
+    x.person,
+  );
+  assert(
+    report.nodes.every(
+      (n) => !Object.hasOwn(n, "time") && !Object.hasOwn(n, "actorId"),
+    ),
+  );
+  assert.deepEqual(knowledge, before);
+  assert.deepEqual((knowledge.records[2]!.value as typeof x.roleValue).time, {
+    earliest: null,
+    latest: null,
+  });
+});

@@ -159,7 +159,7 @@
         3,
         4
       ],
-      "implementationStatus": "partial private planning; eight local tests/typecheck/build/registry; installed/CI/review evidence in docs/verification.json; partial private effort bookkeeping checkpoint; final-head CI/installed review pending; AM-05.06 verification/closure dependencies remain unmet; PR2 15 local/installed tests and source review pass; docs/efforts-verification.json; current-head CI required; PR3 explicit accepted Knowledge relationship consumer upgrade;20 local/installed tests pass, initial CI40832917971 success20; final-head CI required; PR4 partial read-only exact Knowledge dependency review;27 local tests pass, installed/review/current-head CI pending",
+      "implementationStatus": "partial private planning; eight local tests/typecheck/build/registry; installed/CI/review evidence in docs/verification.json; partial private effort bookkeeping checkpoint; final-head CI/installed review pending; AM-05.06 verification/closure dependencies remain unmet; PR2 15 local/installed tests and source review pass; docs/efforts-verification.json; current-head CI required; PR3 explicit accepted Knowledge relationship consumer upgrade;20 local/installed tests pass, initial CI40832917971 success20; final-head CI required; PR4 partial read-only exact Knowledge dependency review;29 local/installed tests and source review pass, initial CI40833611442 success27; final-head CI required",
       "acceptanceCriteria": [
         "A report becomes a plan including at least one route for testing contrary evidence where applicable.",
         "Provide the authorized visual or table view, source-bound test evidence and documented failure behavior."

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "status": "partial; final-head CI/merge required",
+  "localTests": 29,
+  "newReviewGroups": 9,
+  "installedCompiledPublicExportTests": 29,
+  "knowledgeReviewJsByteMatchesBuild": true,
+  "typecheck": "passed",
+  "build": "passed",
+  "registry": "passed",
+  "sourceSha256": {
+    "src/knowledge-review.ts": "d467e2d95e71814e423f886ecd0ee13afc5e01b31e3e5116d34b3b7a000f214a",
+    "tests/knowledge-review.test.ts": "c79d9523101d2b12d3e1133aa4633f128d121a5504d30effe9473d280096b71e",
+    "package.json": "3bc5edd916145c5be013f6a6a74ec4de78175d9d052cf07d0ef6196341833949"
+  },
+  "initialCI": {
+    "source": "44de98a9537ae7ae47daa91c0b55d4f61d0f83fa",
+    "run": 40833611442,
+    "job": 123313183515,
+    "tests": 27,
+    "conclusion": "success",
+    "headAndLogsInspected": true
+  },
+  "review": "No unresolved finding. Actual scoped public validators, exact selected plan, logical kind/ID vs full edition keys, captured-only graph traversal, missing snapshots not absence proof, dedup with multiple editions and exact256/512 caps, detached refs-only private output, no mutation or effects.",
+  "limitations": [
+    "Trusted host Context and snapshots are not authentication/current external policy.",
+    "Latest is relative to the supplied snapshot; current-edition does not establish source/role truth, evidence validity, completeness or an action permit.",
+    "Not full AM05.08 correction impact: no findings/evidence/effort/creative/release traversal or automatic invalidation.",
+    "No SQL/durable audit/idempotency/network/provider/UI/browser/AT/live qualification."
+  ]
+}
