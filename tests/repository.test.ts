@@ -393,3 +393,147 @@ test("storage CAS spans distinct logical plans while exact plan predecessors and
   );
   assert.equal((await f.repo.load(c)).revision, 3);
 });
+
+async function effortFixture(t: test.TestContext) {
+  const f = await fixture(t),
+    x = input();
+  const plan = (await f.repo.append(c, 0, x.knowledge, x.command, "plan"))
+    .record;
+  const effort = {
+    id: "effort",
+    expectedSequence: 0,
+    plan,
+    questionId: "time",
+    leadId: "log",
+    outcome: "attempted" as const,
+    detail: "Fictional unresolved attempt",
+    corrects: null,
+  };
+  return { ...f, x, effort };
+}
+test("own DB efforts preserve historical corrections and load actual stored plans without changing planning history", async (t) => {
+  const f = await effortFixture(t);
+  const first = await f.repo.recordEffort(c, 0, f.effort, "effort");
+  await f.repo.append(
+    c,
+    1,
+    f.x.knowledge,
+    { ...f.x.command, expectedRevision: 1 },
+    "revise-plan",
+  );
+  await assert.rejects(
+    f.repo.recordEffort(
+      c,
+      1,
+      { ...f.effort, id: "stale", expectedSequence: 1 },
+      "stale",
+    ),
+    { code: "stale_plan" },
+  );
+  await f.repo.recordEffort(
+    c,
+    1,
+    {
+      ...f.effort,
+      id: "correction",
+      expectedSequence: 1,
+      detail: "Corrected unresolved account",
+      corrects: first.record,
+    },
+    "correction",
+  );
+  const read = await new FactualRepository(f.db, f.policy).loadEfforts(c);
+  assert.equal(read.revision, 2);
+  assert.equal(read.planningRevision, 2);
+  assert.equal(read.state.records[0]!.detail, f.effort.detail);
+  assert.deepEqual(read.state.records[1]!.corrects, first.record);
+  Object.assign(read.state.records[0]!, { detail: "Detached" });
+  assert.notDeepEqual(await f.repo.loadEfforts(c), read);
+  await assert.rejects(
+    f.repo.recordEffort(
+      c,
+      2,
+      { ...f.effort, id: "fork", expectedSequence: 2, corrects: first.record },
+      "fork",
+    ),
+  );
+  assert.equal((await f.repo.load(c)).revision, 2);
+});
+test("effort lost COMMIT acknowledgement and post-outbox rollback cannot duplicate records or forge planning acknowledgement", async (t) => {
+  const f = await effortFixture(t);
+  f.hooks.lost = true;
+  await assert.rejects(f.repo.recordEffort(c, 0, f.effort, "effort"));
+  const ack = await new FactualRepository(f.db, f.policy).recordEffort(
+    c,
+    0,
+    f.effort,
+    "effort",
+  );
+  assert.equal(ack.storage.revision, 1);
+  f.hooks.rollback = true;
+  await assert.rejects(
+    f.repo.recordEffort(
+      c,
+      1,
+      { ...f.effort, id: "second", expectedSequence: 1 },
+      "second",
+    ),
+  );
+  f.hooks.rollback = false;
+  assert.equal((await f.repo.loadEfforts(c)).revision, 1);
+  await assert.rejects(f.repo.recordEffort(c, 0, f.effort, "plan"));
+  assert.deepEqual(await f.repo.recordEffort(c, 0, f.effort, "effort"), ack);
+  await scoped(f.db, c, async (tx) => assert(verifyAudit(await tx.audits())));
+});
+test("effort CAS stored-plan binding and current host authority gate new commands and cached replay", async (t) => {
+  const f = await effortFixture(t);
+  for (const bad of [
+    { ...f.effort, questionId: "missing" },
+    { ...f.effort, leadId: "missing" },
+    { ...f.effort, plan: { ...f.effort.plan, revision: 99 } },
+    { ...f.effort, plan: { ...f.effort.plan, projectId: "foreign" } },
+  ])
+    await assert.rejects(f.repo.recordEffort(c, 0, bad, "bad"));
+  const results = await Promise.allSettled(
+    ["one", "two"].map((id) => f.repo.recordEffort(c, 0, f.effort, id)),
+  );
+  assert.equal(results.filter((x) => x.status === "fulfilled").length, 1);
+  for (const bad of [
+    { ...c, purpose: "other" },
+    { ...c, actor: { ...c.actor, roles: ["viewer"] } },
+    { ...c, actor: { ...c.actor, kind: "agent" as const } },
+  ]) {
+    await assert.rejects(f.repo.loadEfforts(bad));
+    await assert.rejects(f.repo.recordEffort(bad, 0, f.effort, "one"));
+  }
+  assert.equal((await f.repo.loadEfforts(c)).revision, 1);
+});
+test("effort input capture isolation and corrupt stored sequence deny cached results while retaining history", async (t) => {
+  const f = await effortFixture(t),
+    q = structuredClone(f.effort),
+    pending = f.repo.recordEffort(c, 0, q, "effort");
+  q.detail = "Caller mutation";
+  Object.assign(q.plan, { id: "unknown" });
+  const ack = await pending,
+    read = await f.repo.loadEfforts(c);
+  assert.equal(read.state.records[0]!.detail, f.effort.detail);
+  const other = { ...c, projectId: "other" },
+    repo = new FactualRepository(f.db, {
+      ...f.policy,
+      projectId: other.projectId,
+    });
+  assert.equal((await repo.loadEfforts(other)).revision, 0);
+  await scoped(f.db, c, async (tx) => {
+    await tx.put(ack.storage.kind, ack.storage.id, 1, read.state);
+  });
+  await assert.rejects(f.repo.loadEfforts(c), { code: "invalid_effort" });
+  await assert.rejects(f.repo.recordEffort(c, 0, f.effort, "effort"), {
+    code: "invalid_effort",
+  });
+  await scoped(f.db, c, async (tx) =>
+    assert.deepEqual(
+      (await tx.get(ack.storage.kind, ack.storage.id, 1))?.value,
+      read.state,
+    ),
+  );
+});

@@ -1,3 +1,5 @@
+import { createEffortState, inspectEfforts, recordEffort } from "./efforts.ts";
+import type { EffortState, EffortInput } from "./efforts.ts";
 import { scoped } from "@accountability/evidence-sql/database";
 import type {
   Database,
@@ -20,6 +22,8 @@ import type {
 import { createPlanningState, inspectPlans, revisePlan } from "./index.ts";
 import type { Plan, PlanningState } from "./index.ts";
 
+export const EFFORT_KIND = "factual-effort-history";
+export const EFFORT_KEY = digest({ aggregate: EFFORT_KIND });
 export const PLANNING_KIND = "factual-planning-history";
 export const PLANNING_KEY = digest({ aggregate: PLANNING_KIND });
 export type PlanningCommand = Readonly<{
@@ -145,6 +149,91 @@ export class FactualRepository {
           };
           await tx.audit("factual.planning.appended", json(result));
           await tx.enqueue("factual.planning.revised", json(result));
+          return json(result);
+        },
+      )) as PlanningAcknowledgement;
+    });
+  }
+  async #efforts(tx: UnitOfWork, c: Context) {
+    const stored = await tx.get<EffortState>(EFFORT_KIND, EFFORT_KEY);
+    if (!stored) return { revision: 0, state: createEffortState(c) };
+    requireScope(c, stored.value);
+    inspectEfforts(c, stored.value);
+    invariant(
+      stored.revision === stored.value.records.length,
+      "invalid_effort",
+      "Storage and effort sequence mismatch",
+    );
+    return { revision: stored.revision, state: stored.value };
+  }
+  async loadEfforts(context: Context) {
+    const c = this.#context(context);
+    return scoped(this.#db, c, async (tx) => {
+      await tx.audit("factual.effort.read_checked", {});
+      const planning = await this.#load(tx, c),
+        efforts = await this.#efforts(tx, c);
+      return structuredClone({
+        ...efforts,
+        planningRevision: planning.revision,
+      });
+    });
+  }
+  async recordEffort(
+    context: Context,
+    expectedStorageRevision: number,
+    input: EffortInput,
+    commandId: string,
+  ): Promise<PlanningAcknowledgement> {
+    const c = this.#context(context),
+      q = structuredClone(input);
+    nonempty(commandId, "Command", 128);
+    invariant(
+      Number.isSafeInteger(expectedStorageRevision) &&
+        expectedStorageRevision >= 0,
+      "invalid_revision",
+      "Expected effort storage revision required",
+    );
+    return scoped(this.#db, c, async (tx) => {
+      await tx.audit("factual.effort.append_checked", {});
+      const planning = await this.#load(tx, c),
+        efforts = await this.#efforts(tx, c);
+      return (await tx.idempotent(
+        commandId,
+        json({
+          operation: "effort",
+          actorKind: c.actor.kind,
+          purpose: c.purpose,
+          expectedStorageRevision,
+          input: q,
+        }),
+        async () => {
+          invariant(
+            efforts.revision === expectedStorageRevision,
+            "revision_conflict",
+            "Effort storage edition changed",
+          );
+          const state = recordEffort(c, planning.state, efforts.state, q);
+          const stored = await tx.put(
+            EFFORT_KIND,
+            EFFORT_KEY,
+            efforts.revision,
+            state,
+          );
+          const result = {
+            storage: {
+              tenantId: c.tenantId,
+              projectId: c.projectId,
+              kind: EFFORT_KIND,
+              id: EFFORT_KEY,
+              revision: stored.revision,
+            },
+            record: state.records.at(-1)!.ref,
+          };
+          await tx.audit(
+            "factual.effort.recorded",
+            json({ ...result, planningRevision: planning.revision }),
+          );
+          await tx.enqueue("factual.effort.revised", json(result));
           return json(result);
         },
       )) as PlanningAcknowledgement;
