@@ -1,3 +1,12 @@
+import {
+  KnowledgeRepository,
+  KNOWLEDGE_KIND,
+  KNOWLEDGE_KEY,
+} from "@accountability/knowledge-verification/repository";
+import {
+  IdentityKnowledgeRepository,
+  KNOWLEDGE_RESOURCE_ID,
+} from "@accountability/knowledge-verification/identity-repository";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
@@ -79,8 +88,12 @@ function input() {
   };
   return { knowledge, command };
 }
-async function fixture(t: test.TestContext) {
-  const hooks: { identity: (() => void) | null } = { identity: null };
+async function fixture(t: test.TestContext, upstream = false) {
+  const hooks: {
+    identity: (() => void) | null;
+    knowledge: (() => void | Promise<void>) | null;
+    lostFactual: boolean;
+  } = { identity: null, knowledge: null, lostFactual: false };
   async function database(name: string): Promise<Database> {
     const pg = new PGlite();
     await pg.exec(
@@ -106,8 +119,13 @@ async function fixture(t: test.TestContext) {
               }),
             }),
           )
-          .then((x) => {
+          .then(async (x) => {
             if (name === "identity_login") hooks.identity?.();
+            if (name === "knowledge_login") await hooks.knowledge?.();
+            if (name === "factual_login" && hooks.lostFactual) {
+              hooks.lostFactual = false;
+              throw Error("Lost real Factual COMMIT acknowledgement");
+            }
             return x;
           }),
       close: () => pg.close(),
@@ -142,7 +160,17 @@ async function fixture(t: test.TestContext) {
     projectId: c.projectId,
     purpose: c.purpose,
   };
+  const knowledge = upstream ? await database("knowledge_login") : null;
+  const kRepo = knowledge
+    ? new KnowledgeRepository(knowledge, { ...fixed, humanIds: ["owner"] })
+    : null;
+  const kFacade = kRepo
+    ? new IdentityKnowledgeRepository(kRepo, membership, fixed)
+    : null;
   return {
+    knowledge,
+    kRepo,
+    kFacade,
     identity,
     factual,
     membership,
@@ -280,4 +308,164 @@ test("captured upstream commands receiver and fixed context binding reject calle
     facade = new IdentityFactualRepository(f.repo, f.membership, fixed);
   fixed.purpose = "other";
   assert.equal((await facade.load(c)).revision, 1);
+});
+
+test("current Knowledge path uses three separate owning DBs, denies missing source policy and rejects stale claim editions", async (t) => {
+  const f = await fixture(t, true),
+    x = input();
+  await f.membership.setResourcePolicy(c, 0, f.policy, "factual-allow");
+  const facade = new IdentityFactualRepository(
+    f.repo,
+    f.membership,
+    f.fixed,
+    10000,
+    f.kFacade!,
+  );
+  await f.kRepo!.append(
+    c,
+    0,
+    { id: "claim", expectedRevision: 0, value: claim },
+    "claim",
+  );
+  await assert.rejects(facade.appendFromKnowledge(c, 0, x.command, "plan"), {
+    code: "knowledge_unavailable",
+  });
+  assert.equal((await f.repo.load(c)).revision, 0);
+  await f.membership.setResourcePolicy(
+    c,
+    1,
+    { ...f.policy, resourceId: KNOWLEDGE_RESOURCE_ID },
+    "knowledge-allow",
+  );
+  const ack = await facade.appendFromKnowledge(c, 0, x.command, "plan");
+  assert.equal(ack.record.id, "plan");
+  await f.kRepo!.append(
+    c,
+    1,
+    { id: "claim", expectedRevision: 1, value: claim },
+    "revise-claim",
+  );
+  await assert.rejects(
+    facade.appendFromKnowledge(c, 1, { ...x.command, id: "other" }, "stale"),
+    { code: "stale_claim" },
+  );
+  await scoped(f.factual, c, async (tx) =>
+    assert.equal(await tx.get(KNOWLEDGE_KIND, KNOWLEDGE_KEY), null),
+  );
+  await scoped(f.knowledge!, c, async (tx) =>
+    assert.equal(await tx.get(PLANNING_KIND, PLANNING_KEY), null),
+  );
+  await f.membership.setResourcePolicy(
+    c,
+    2,
+    { ...f.policy, resourceId: KNOWLEDGE_RESOURCE_ID, actions: [] },
+    "source-revoke",
+  );
+  await assert.rejects(facade.appendFromKnowledge(c, 0, x.command, "plan"), {
+    code: "knowledge_unavailable",
+  });
+  assert.equal((await f.repo.load(c)).revision, 1);
+});
+
+test("upstream lost late or cancelled acknowledgement prevents Factual writes and current Factual policy is rechecked after Knowledge", async (t) => {
+  const f = await fixture(t, true),
+    x = input();
+  await f.membership.setResourcePolicy(c, 0, f.policy, "factual-allow");
+  await f.membership.setResourcePolicy(
+    c,
+    1,
+    { ...f.policy, resourceId: KNOWLEDGE_RESOURCE_ID },
+    "knowledge-allow",
+  );
+  await f.kRepo!.append(
+    c,
+    0,
+    { id: "claim", expectedRevision: 0, value: claim },
+    "claim",
+  );
+  const facade = new IdentityFactualRepository(
+    f.repo,
+    f.membership,
+    f.fixed,
+    10000,
+    f.kFacade!,
+  );
+  f.hooks.knowledge = () => {
+    throw Error("private upstream detail");
+  };
+  await assert.rejects(facade.appendFromKnowledge(c, 0, x.command, "lost"), {
+    code: "knowledge_unavailable",
+    message: "Current Knowledge observation unavailable",
+  });
+  const control = new AbortController();
+  f.hooks.knowledge = () => control.abort();
+  await assert.rejects(
+    facade.appendFromKnowledge(c, 0, x.command, "cancel", control.signal),
+    { code: "knowledge_unavailable" },
+  );
+  f.hooks.knowledge = () => {
+    const until = performance.now() + 600;
+    while (performance.now() < until) {}
+  };
+  await assert.rejects(
+    new IdentityFactualRepository(
+      f.repo,
+      f.membership,
+      f.fixed,
+      50,
+      f.kFacade!,
+    ).appendFromKnowledge(c, 0, x.command, "late"),
+    { code: "knowledge_unavailable" },
+  );
+  f.hooks.knowledge = async () => {
+    f.hooks.knowledge = null;
+    await f.membership.setResourcePolicy(
+      c,
+      2,
+      { ...f.policy, actions: [] },
+      "factual-revoke",
+    );
+  };
+  await assert.rejects(
+    facade.appendFromKnowledge(c, 0, x.command, "revoked-after-source"),
+    { code: "identity_unavailable" },
+  );
+  assert.equal((await f.repo.load(c)).revision, 0);
+});
+
+test("current Knowledge path captures inputs, preserves lost Factual commit history and requires both gates before replay", async (t) => {
+  const f = await fixture(t, true),
+    x = input();
+  await f.membership.setResourcePolicy(c, 0, f.policy, "factual-allow");
+  await f.membership.setResourcePolicy(
+    c,
+    1,
+    { ...f.policy, resourceId: KNOWLEDGE_RESOURCE_ID },
+    "knowledge-allow",
+  );
+  await f.kRepo!.append(
+    c,
+    0,
+    { id: "claim", expectedRevision: 0, value: claim },
+    "claim",
+  );
+  const facade = new IdentityFactualRepository(
+      f.repo,
+      f.membership,
+      f.fixed,
+      10000,
+      f.kFacade!,
+    ),
+    cmd = structuredClone(x.command);
+  const pending = facade.appendFromKnowledge(c, 0, cmd, "plan");
+  Object.assign(cmd, { id: "mutated" });
+  f.hooks.lostFactual = true;
+  await assert.rejects(pending);
+  assert.equal((await f.repo.load(c)).revision, 1);
+  const ack = await facade.appendFromKnowledge(c, 0, x.command, "plan");
+  assert.equal(ack.record.id, "plan");
+  await assert.rejects(f.facade.appendFromKnowledge(c, 0, x.command, "plan"), {
+    code: "knowledge_unavailable",
+  });
+  assert.equal((await f.repo.load(c)).revision, 1);
 });

@@ -27,3 +27,5 @@ Partial own-DB plan persistence is documented in REPOSITORY.md; it supersedes pu
 Durable effort metadata is now partially implemented in EFFORT_REPOSITORY.md; earlier pure-effort/persistence-pending statements are historical. Current Identity/upstream authorization, evaluated answers and closure remain pending.
 
 Explicit opt-in current stored Identity/resource-policy integration is now documented in IDENTITY_REPOSITORY.md; earlier Identity-pending notes still apply to direct legacy repository access. Host proofing/current upstream/consent/rights and production qualification remain pending.
+
+CURRENT_KNOWLEDGE.md documents the explicit accepted Knowledge pin upgrade and appendFromKnowledge integration. Legacy snapshot APIs still require separately authorized host snapshots; current Knowledge composition does not qualify Evidence/Intake, consent/rights, login or production.
