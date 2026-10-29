@@ -239,3 +239,41 @@ test("history capacity and UTF8 aggregate budget never evict older plans", () =>
     });
   assert.throws(() => f.assertPlanningState(huge), { code: "planning_full" });
 });
+
+test("ordered child questions and current hypothesis refs are captured without truth status", () => {
+  const x = setup();
+  const parent = x.q.value.questions[0]!;
+  const child = {
+    ...structuredClone(parent),
+    id: "precision",
+    parentId: parent.id,
+    hypotheses: [
+      { ...parent.hypotheses[0]!, claimRefs: [x.knowledge.records[0]!.ref] },
+    ],
+  };
+  const value = { ...x.q.value, questions: [parent, child] };
+  const s = f.revisePlan(c, x.knowledge, x.state, { ...x.q, value });
+  assert.equal(s.records[0]!.value.questions[1]!.parentId, "time");
+  const knowledge = k.reviseKnowledge(c, x.knowledge, {
+    id: "claim",
+    expectedRevision: 1,
+    value: claim,
+  });
+  assert.throws(
+    () =>
+      f.revisePlan(c, knowledge, s, {
+        ...x.q,
+        expectedRevision: 1,
+        value: { ...value, basisClaimRefs: [] },
+      }),
+    { code: "stale_claim" },
+  );
+  assert.throws(
+    () =>
+      f.revisePlan(c, x.knowledge, x.state, {
+        ...x.q,
+        value: { ...value, questions: [child, parent] },
+      }),
+    { code: "invalid_tree" },
+  );
+});

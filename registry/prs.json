@@ -153,8 +153,10 @@
       "dependsOn": [
         "AM-05.01"
       ],
-      "contributingPrs": [],
-      "implementationStatus": "partial pure private planning; tested source checkpoint; CI/installed review pending",
+      "contributingPrs": [
+        1
+      ],
+      "implementationStatus": "partial private planning; eight local tests/typecheck/build/registry; installed/CI/review evidence in docs/verification.json",
       "acceptanceCriteria": [
         "A report becomes a plan including at least one route for testing contrary evidence where applicable.",
         "Provide the authorized visual or table view, source-bound test evidence and documented failure behavior."
