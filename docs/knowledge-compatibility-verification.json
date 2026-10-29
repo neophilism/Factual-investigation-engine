@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "status": "partial; final-head CI/merge required",
+  "localTests": 20,
+  "newCompatibilityGroups": 5,
+  "installedCompiledPublicExportTests": 20,
+  "runtimeJsByteMatchesBuild": true,
+  "typecheck": "passed",
+  "build": "passed",
+  "registry": "passed",
+  "sourceSha256": {
+    "package.json": "d7c301174e5c62486523fdfcf7f6502fa1e83e3c270746d71937ded00ae7105e",
+    "package-lock.json": "28449939c0c3222e174b751c708fec124a19e81357f33621654dec7150986c39",
+    "scripts/validate-pr-registry.mjs": "763fa6788bf5fc269555c2268c25a402ca7f049b01003c0da52d0617ef23bcb4",
+    "tests/knowledge-compatibility.test.ts": "fe4084319b9701a50b461f2a8bbd7ea655eba513a1a6cf578cfea150912253ae"
+  },
+  "initialCI": {
+    "source": "e3c8b336a259c0a0cf692059832eda447f488e2b",
+    "run": 40832917971,
+    "job": 123310988739,
+    "tests": 20,
+    "conclusion": "success",
+    "headAndLogsInspected": true
+  },
+  "review": "Pinned accepted upstream source; minimal lock change; actual public Knowledge parser and planning/effort refs; exact scope/kinds/current claim vs transitive historical dependencies; old15 groups preserved; no unresolved finding. No Factual runtime/API change.",
+  "localCorrections": [
+    "TypeScript filter did not narrow nested KnowledgeValue; explicit discriminant guard fixed test before first checkpoint.",
+    "Installed test harness initially commonjs; explicitly set fixture type=module and all20 passed compiled exports. No runtime failure hidden."
+  ],
+  "limitations": [
+    "Context and Knowledge snapshots are trusted host input, not authentication/current policy.",
+    "Current claim checks are not transitive relationship or endpoint freshness; explicit new claim/plan editions required.",
+    "No SQL/durable audit/idempotency/current-source/automatic correction impact/UI/browser/AT/live qualification.",
+    "AM-05.03 partial; no evaluated answers, closure, providers, sends, publication or payments."
+  ]
+}

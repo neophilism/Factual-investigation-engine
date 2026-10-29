@@ -18,7 +18,7 @@ for (const u of r.units)
   assert.deepEqual(u.dependsOn, tasks.find((t) => t.id === u.id).dependencies);
 assert.equal(
   read("package.json").dependencies["@accountability/knowledge-verification"],
-  "git+https://github.com/neophilism/Knowledge-and-verification-engine.git#b937c856f9571fab42fafd31dd0f95eef25a6340",
+  "git+https://github.com/neophilism/Knowledge-and-verification-engine.git#85e7185e608b4663254284b673256d17cf5da6e8",
 );
 console.log(
   "Valid E08 registry:15 engines/122 tasks; original IDs/dependencies and Knowledge pin retained",
