@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "status": "partial; source checkpoint; final-head CI pending",
+  "sourceSha256": {
+    "src/index.ts": "dcd4222166326264c540de88d6eb962e6f86a47aaf84f1e4191aa525576228ef",
+    "tests/planning.test.ts": "15bc99e2e2087b4314e57f160b56c34ee31b7b7723e87c53b2f46a0fca7e1d30",
+    "package.json": "1e985c079995abc81fffd5a3f705ca610f2f0f96bd31bcf18a51a43eacec9d5e",
+    "package-lock.json": "3fca469daa5674b6bacc915f5086f0c0e9fab877e3ab7b25f8b9858c8757ffff",
+    "scripts/validate-pr-registry.mjs": "f4e18c54b82607998379f9702a5165dedc3ee672565b9b653927ac995e380877"
+  },
+  "localTests": 8,
+  "typecheck": "passed",
+  "build": "passed",
+  "registry": "passed",
+  "review": "Source/adversarial review completed; no unresolved finding. Exact fields/scope/roles/current claims/lineage/material retention/tree ordering/caps/private defaults/no effects. No current authentication/durability/semantic verification/closure claim.",
+  "pending": [
+    "Current authenticated Knowledge/Identity/action/consent/rights integration",
+    "Durable own-DB audit/idempotency",
+    "Evaluated answers/completeness/deferral/closure/referrals",
+    "Authorized visual/table/browser/AT/live acceptance"
+  ],
+  "private": true,
+  "initialCI": {
+    "source": "bff10fd7891e403b3750b17e7dfa11cbe1eedd0f",
+    "run": 40809403606,
+    "job": 123235886691,
+    "tests": 7,
+    "conclusion": "success",
+    "logsInspected": true
+  },
+  "installedCompiledPublicExports": {
+    "tests": 8,
+    "conclusion": "passed",
+    "indexJsByteMatchesBuild": true
+  }
+}
