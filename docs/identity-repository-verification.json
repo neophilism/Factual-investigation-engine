@@ -1,0 +1,39 @@
+{
+  "status": "partial; current-head CI/merge required",
+  "localTests": 45,
+  "newDualDatabaseRestrictedMigrationGroups": 4,
+  "typecheck": "passed",
+  "build": "passed",
+  "registry": "passed",
+  "sourceSha256": {
+    "src/identity-repository.ts": "e2a566c05f84f8d9661925f7f05117ae79cc54caa112a83050f428a8f1a8b6a9",
+    "tests/identity-repository.test.ts": "c23e773173183fc5cb0dc05383ca2924c0bdf9822cae74ebeeda57d8f5aa80bb",
+    "package.json": "36f33393b3ead1db486dcc37efd566d11465a83eda30ddb758493a9c106a0be2",
+    "package-lock.json": "3e3e8d914f8192a8dee7c5878931b0b5766e8cec6151a221d8367fcea5ca54ec",
+    "scripts/validate-pr-registry.mjs": "e0a4e0e9d05eb564afc6c4eadd729bb6f1e339a1944be33ea701a1fbed7f839e"
+  },
+  "review": "No unresolved source finding. Actual pinned current resolveResource on every plan/effort invocation and historical replay; fixed whole-history resource/investigate/purpose; strips incoming roles. Existing Factual host-list/purpose/role/domain/history checks preserved. Captured context/inputs/receivers; monotonic admission/result acceptance; await begun Identity SQL and deny late/cancelled/unknown before Factual. Separate actual restricted owning DBs asserted both directions.",
+  "fixtureCorrections": [
+    "Initial check started before normal dependency preparation completed: tsc unavailable, no tests ran. Reran after install.",
+    "Readonly command mutation in test changed to Object.assign before source checkpoint; runtime unchanged."
+  ],
+  "limits": [
+    "Host independently authenticates human kind/id/request and configuration/time; no login/credential proofing.",
+    "Use facade exclusively where required; never fall back to legacy repository on denial/unknown.",
+    "Identity/Factual sequential observations are not distributed permission fencing; Knowledge/Evidence/Intake snapshots and current consent/rights remain separate.",
+    "Host ingress/CPU/heap/driver/transaction/concurrency limits mandatory; copying not preemptible, begun SQL awaited. Factual acknowledged SQL completion preserved; lost acknowledgement UNKNOWN.",
+    "Embedded PGlite hooks do not qualify independent TCP contention, TLS/failover/crash/production or browser/AT/live acceptance.",
+    "Historical acknowledgements not fresh source/work/coverage/permission attestations; no effects/provider/send/publication/payment/PAM changes."
+  ],
+  "initialCI": {
+    "source": "13483c56f062b7d17a8a1ee422ffe200004310a5",
+    "run": 40877315552,
+    "job": 123459348139,
+    "tests": 45,
+    "conclusion": "success",
+    "headAndLogsInspected": true
+  },
+  "installedCompiledExportTests": 45,
+  "identityRepositoryJsByteMatch": true,
+  "installedHarness": "Fresh packed package/public exports; normal dependency prepare completed before tests; full45-test TAP footer/exit success verified."
+}
