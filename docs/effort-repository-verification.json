@@ -1,0 +1,32 @@
+{
+  "status": "partial; final-head CI/merge required",
+  "localTests": 41,
+  "newRestrictedMigrationGroups": 4,
+  "typecheck": "passed",
+  "build": "passed",
+  "registry": "passed",
+  "initialCI": {
+    "source": "6d59ce25e6104874155e17757bf49675f64b33aa",
+    "run": 40868588618,
+    "job": 123429526743,
+    "tests": 41,
+    "conclusion": "success",
+    "headAndLogsInspected": true
+  },
+  "sourceSha256": {
+    "src/repository.ts": "bf8ffc08bbbfc8db0b22ee317ee6441cc0c9dac1134deca0516bb125547cffe8",
+    "tests/repository.test.ts": "d8bea387b9838ff85ec4a12827dabc9c2e5bcdb73a64cb8672bad0f590dedc38"
+  },
+  "review": "No unresolved source finding. Owning project lock precedes actual planning/effort/cache reads; host fixed human authority before replay. Actual accepted effort domain validates exact current plans/new efforts and exact historical correction contexts. Separate storage/sequence CAS, isolated operation fingerprint, immutable history and atomic audit/outbox/ack. No new execution or closure authority.",
+  "limits": [
+    "Context/configuration/time remain host trusted; no current Identity/upstream/consent integration claim.",
+    "Historical replay returns original refs, not current plan usability or new work authority; historical effective leaves do not prove actual work or current coverage.",
+    "Own Factual DB only, stable SDK/migration/pins/contracts unchanged; no foreign DB access.",
+    "Host CPU/heap/ingress/driver/transaction/concurrency limits required; await begun SQL and treat lost acknowledgement as UNKNOWN.",
+    "Embedded restricted PGlite contenders/hooks are not independent TCP/crash/TLS/failover/production or browser/AT/live qualification.",
+    "AM-05.06 verification/closure dependencies unmet; no effects/provider/send/publication/payment/PAM changes."
+  ],
+  "installedCompiledExportTests": 41,
+  "repositoryJsByteMatch": true,
+  "installedHarness": "Freshly packed compiled public exports, complete41-test TAP footer/exit success verified. First attempt before dependency installation completed failed module resolution; not counted as acceptance; setup completed then full41 rerun passed."
+}
